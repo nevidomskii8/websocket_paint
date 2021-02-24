@@ -1,25 +1,27 @@
 const express = require('express')
 const app = express()
-const WSServer = require('express-ws')(app)
-const aWss = WSServer.getWss()
+const WSServer = require('express-ws')(app) //передаем приложение в импортируемую функцию
+const aWss = WSServer.getWss() //в-т объект со всеми подключенными пользователями (aWss.client)
+
 
 const PORT = process.env.PORT || 5000
 
 app.ws('/', (ws, req) => {
-    ws.on('message', (msg) => {
+    console.log('connetion is success!.') 
+    ws.on('message', (msg) => { //message - это тип события, на котрой можно подписаться
         msg = JSON.parse(msg)
         switch (msg.method) {
             case 'connection':
-                console.log(msg.method)
                 connectionHandler(ws, msg) 
                 break
         }
     })
 })
+app.listen(PORT, () => console.log(`server started on PORT ${PORT}...`))
 
 const connectionHandler = (ws, msg) => {
-    ws.id = msg.id
-    broadcastConnection(ws,msg)
+    ws.id = msg.id // присвоение каждому вебсокету свой id
+    broadcastConnection(ws,msg) // функция широковещательной рассылки 
 }
 
 const broadcastConnection = (ws, msg) => {
@@ -30,5 +32,3 @@ const broadcastConnection = (ws, msg) => {
         }
     })
 }
-
-app.listen(PORT, () => console.log(`server started on PORT ${PORT}...`))
